@@ -13,12 +13,14 @@ describe("GET /api/treasures", () => {
         .get("/api/topics")
         .expect(200)
         .then(({ body: { topics } }) => {            
-          expect(topics[0]).toEqual(
-            expect.objectContaining({
-              description: expect.any(String),
-              slug: expect.any(String),
-            })
-          );
+            for (const topic of topics) {
+                expect(topic).toEqual(
+                    expect.objectContaining({
+                      description: expect.any(String),
+                      slug: expect.any(String),
+                    })
+                  );
+            }
         });
     });
 
