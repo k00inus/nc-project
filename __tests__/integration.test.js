@@ -19,13 +19,16 @@ describe("GET /api", () => {
         }
 
         for (const api of apiArray.slice(1)) {
-          expect(api).toEqual(
-            expect.objectContaining({
-              description: expect.any(String),
-              queries: expect.arrayContaining([]),
-              exampleResponse: expect.objectContaining({}),
-            })
-          );
+          if (api.length !== 0) {
+            expect(api).toEqual(
+              expect.objectContaining({
+                description: expect.any(String),
+                queries: expect.arrayContaining([]),
+                exampleResponse: expect.objectContaining({}),
+              })
+            );
+          }
+
         }
       });
   });
@@ -38,12 +41,15 @@ describe("GET /api/topics", () => {
       .expect(200)
       .then(({ body: { topics } }) => {
         for (const topic of topics) {
-          expect(topic).toEqual(
-            expect.objectContaining({
-              description: expect.any(String),
-              slug: expect.any(String),
-            })
-          );
+          if (topic !== 0) {
+            expect(topic).toEqual(
+              expect.objectContaining({
+                description: expect.any(String),
+                slug: expect.any(String),
+              })
+            );
+          }
+
         }
       });
   });
@@ -54,7 +60,7 @@ describe("GET /api/articles/:article_id", () => {
     return request(app)
       .get("/api/articles/1")
       .expect(200)
-      .then(({ body: { article } }) => {
+      .then(({ body: { article } }) => {        
         expect(article[0]).toEqual(
           expect.objectContaining({
             title: expect.any(String),
