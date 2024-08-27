@@ -50,14 +50,13 @@ exports.fetchCommentsByArticleId = async (id) => {
       values: [id],
     });
     if (result.rows.length === 0) {
-      return Promise.reject({ status: 200, msg: "No comments yet." });
+      return [];
     }
     return result.rows;
   } catch (err) {
     if (err.code === "22P02") {
       return Promise.reject({ status: 400, msg: "invalid request" });
     }
-
     return err;
   }
 };

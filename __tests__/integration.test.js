@@ -135,6 +135,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .expect(200)
       .then(({ body: { comments } }) => {
         for (const comment of comments) {
+          expect(comment.article_id).toBe(1)
           expect(comment).toEqual(
             expect.objectContaining({
               author: expect.any(String),
@@ -148,12 +149,22 @@ describe("GET /api/articles/:article_id/comments", () => {
         }
       });
   });
-  test("200:valid article_id but no comments", () => {
+  test("200: returns an array array of comments sorted by date", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+  test("200:valid article_id but no comments, returns an empty array", () => {
     return request(app)
       .get("/api/articles/4/comments")
       .expect(200)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe("No comments yet.");
+      .then(({ body: { comments } }) => {
+        expect(comments).toEqual([]);
       });
   });
   test("404: wrong article_id", () => {
