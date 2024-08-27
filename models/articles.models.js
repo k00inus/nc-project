@@ -30,3 +30,34 @@ exports.selectArticleById = (id) => {
     return rows;
   });
 };
+
+exports.fetchCommentsByArticleId = async (id) => {
+  try {
+    const existResult = await db.query({
+      text: "SELECT EXISTS (SELECT * FROM articles WHERE article_id = $1)",
+      values: [id],
+    });
+    if (!existResult.rows[0].exists) {
+      return Promise.reject({ status: 404, msg: `article_id ${id} not found` });
+    }
+
+    const result = await db.query({
+      text: `
+        SELECT * FROM comments
+        WHERE article_id = $1
+        ORDER BY created_at DESC;
+        `,
+      values: [id],
+    });
+    if (result.rows.length === 0) {
+      return Promise.reject({ status: 200, msg: "No comments yet." });
+    }
+    return result.rows;
+  } catch (err) {
+    if (err.code === "22P02") {
+      return Promise.reject({ status: 400, msg: "invalid request" });
+    }
+
+    return err;
+  }
+};

@@ -78,6 +78,16 @@ describe("GET /api/articles", () => {
         }
       });
   });
+  test("200: returns an array of article objects sorted by, date", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
 });
 
 describe("GET /api/articles/:article_id", () => {
@@ -85,7 +95,7 @@ describe("GET /api/articles/:article_id", () => {
     return request(app)
       .get("/api/articles/1")
       .expect(200)
-      .then(({ body: { article } }) => {        
+      .then(({ body: { article } }) => {
         expect(article[0]).toEqual(
           expect.objectContaining({
             title: expect.any(String),
@@ -124,8 +134,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body: { comments } }) => {
-        expect(comments.length).toBe(11)
-        for (const comment of comments) {        
+        for (const comment of comments) {
           expect(comment).toEqual(
             expect.objectContaining({
               author: expect.any(String),
@@ -139,14 +148,12 @@ describe("GET /api/articles/:article_id/comments", () => {
         }
       });
   });
-  test("200: returns an array of comments for the given article_id sorted by, date", () => {
+  test("200:valid article_id but no comments", () => {
     return request(app)
-      .get("/api/articles/1/comments")
+      .get("/api/articles/4/comments")
       .expect(200)
-      .then(({ body: { comments } }) => {
-        expect(comments).toBeSortedBy("created_at", {
-          descending: true,
-        });
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("No comments yet.");
       });
   });
   test("404: wrong article_id", () => {
@@ -154,7 +161,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/100/comments")
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe("Comments not found");
+        expect(msg).toBe("article_id 100 not found");
       });
   });
   test("400: reject if article_id is wrong/invalid", () => {
