@@ -28,6 +28,8 @@ exports.getCommentsByArticleId = (req, res, next) => {
       res.status(200).send({ comments });
     })
     .catch((err) => {
+      console.log(err, 'in cont');
+      
       next(err);
     });
 };
