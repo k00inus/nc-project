@@ -95,3 +95,29 @@ exports.postComment = async (id, author, comment) => {
   });
   return result.rows[0];
 };
+
+exports.editArticle = async (id, votes) => {
+  if (!votes) {
+    return Promise.reject({ status: 422, msg: "Input required" });
+  }
+  const existResult = await db.query({
+    text: "SELECT EXISTS (SELECT * FROM articles WHERE article_id  = $1)",
+    values: [id],
+  });
+  if (!existResult.rows[0].exists) {
+    return Promise.reject({
+      status: 404,
+      msg: `article_id ${id} not found`,
+    });
+  }
+
+  const result = await db.query({
+    text: `
+      UPDATE articles 
+      SET votes = votes + ($1)
+      WHERE article_id = $2
+      RETURNING *`,
+    values: [votes, id],
+  });
+  return result.rows[0];
+};

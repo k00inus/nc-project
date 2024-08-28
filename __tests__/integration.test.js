@@ -260,3 +260,49 @@ describe("POST /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("200: edits the article with the given id", () => {
+    const newVotes = { inc_votes: -100 };
+
+    return request(app)
+      .patch("/api/articles/7")
+      .send(newVotes)
+      .expect(200)
+      .then(({ body: { article } }) => {         
+        expect(article.article_id).toBe(7)     
+        expect(article).toEqual(
+          expect.objectContaining({
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            article_id: expect.any(Number),
+          })
+        );
+      });
+  });
+  test("404: reject if article_id is wrong/invalid", () => {
+    const newVotes = { inc_votes: -100 };
+    return request(app)
+      .patch("/api/articles/456")
+      .send(newVotes)
+      .expect(404)
+      .then(({ body: { msg } }) => {        
+        expect(msg).toBe("article_id 456 not found");
+      });
+  });
+  test("422: reject if no votes object is supplied", () => {
+    const newVotes = { };
+    return request(app)
+      .patch("/api/articles/456")
+      .send(newVotes)
+      .expect(422)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Input required");
+      });
+  });
+})

@@ -1,4 +1,4 @@
-const { selectArticleById, fetchAllArticles, fetchCommentsByArticleId, postComment, } = require("../models/articles.models");
+const { selectArticleById, fetchAllArticles, fetchCommentsByArticleId, postComment, editArticle, } = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
   fetchAllArticles()
@@ -45,6 +45,19 @@ exports.postCommentByArticleId = (req, res, next) => {
       return res.status(201).send({ comment });
     })
     .catch((err) => {
+      next(err);
+    });
+};
+
+exports.patchArticleById = (req, res, next) => {
+  const { article_id } = req.params;
+  const { inc_votes } = req.body;  
+
+  editArticle(article_id, inc_votes)
+    .then((article) => {
+      return res.status(200).send({ article });
+    })
+    .catch((err) => {      
       next(err);
     });
 };
