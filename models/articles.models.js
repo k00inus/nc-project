@@ -15,12 +15,10 @@ exports.fetchAllArticles = async (sort_by, order) => {
 
   if (sort_by) {
     const columnNames = ["author", "title", "article_id", 'topic', 'created_at', 'votes', 'comment_count'];
-    console.log(order, 'in mods');
     if (columnNames.includes(sort_by)) {
       if (order === undefined) {
         order = 'desc'
       }
-      console.log(order, 'in mods 2');
       
       
      query = formatQuery(sort_by, order)

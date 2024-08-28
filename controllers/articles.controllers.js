@@ -2,7 +2,6 @@ const { selectArticleById, fetchAllArticles, fetchCommentsByArticleId, postComme
 
 exports.getArticles = (req, res, next) => {
   const { sort_by, order } = req.query;  
-  console.log(order, 'in conts');
   
   fetchAllArticles(sort_by, order)
     .then((articles) => {      
