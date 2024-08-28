@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const checkExists = require('./utils.models')
 
 exports.fetchAllArticles = () => {
   let query = {
@@ -32,12 +33,10 @@ exports.selectArticleById = (id) => {
 };
 
 exports.fetchCommentsByArticleId = async (id) => {
-  const existResult = await db.query({
-    text: "SELECT EXISTS (SELECT * FROM articles WHERE article_id = $1)",
-    values: [id],
-  });
-  if (!existResult.rows[0].exists) {
-    return Promise.reject({ status: 404, msg: `article_id ${id} not found` });
+  if (!id) {
+    return Promise.reject({ status: 400, msg: "Id required" });
+  } else {
+    await checkExists('articles', 'article_id', id)
   }
 
   const result = await db.query({
@@ -61,30 +60,12 @@ exports.postComment = async (id, author, comment) => {
   if (!author) {
     return Promise.reject({ status: 422, msg: "username is required" });
   } else {
-    const existResult = await db.query({
-      text: "SELECT EXISTS (SELECT * FROM users WHERE username = $1)",
-      values: [author],
-    });
-    if (!existResult.rows[0].exists) {
-      return Promise.reject({
-        status: 404,
-        msg: `username ${author} not found`,
-      });
-    }
+    await checkExists('users', 'username', author)
   }
   if (!id) {
-    return Promise.reject({ status: 422, msg: "article_id is required" });
+    return Promise.reject({ status: 400, msg: "Id required" });
   } else {
-    const existResult = await db.query({
-      text: "SELECT EXISTS (SELECT * FROM articles WHERE article_id  = $1)",
-      values: [id],
-    });
-    if (!existResult.rows[0].exists) {
-      return Promise.reject({
-        status: 404,
-        msg: `article_id ${id} not found`,
-      });
-    }
+    await checkExists('articles', 'article_id', id)
   }
   const result = await db.query({
     text: `
@@ -97,27 +78,24 @@ exports.postComment = async (id, author, comment) => {
 };
 
 exports.editArticle = async (id, votes) => {
-  if (!votes) {
-    return Promise.reject({ status: 400, msg: "Input required" });
-  }
-  const checkIfIdIsValid = await db.query({
-    text: "SELECT EXISTS (SELECT * FROM articles WHERE article_id  = $1)",
-    values: [id],
-  });
-  if (!checkIfIdIsValid.rows[0].exists) {
-    return Promise.reject({
-      status: 404,
-      msg: `article_id ${id} not found`,
+ 
+    if (!votes) {
+      return Promise.reject({ status: 400, msg: "Input required" });
+    }
+    if (!id) {
+      return Promise.reject({ status: 400, msg: "Id required" });
+    } else {
+      await checkExists('articles', 'article_id', id)
+    }
+  
+    const result = await db.query({
+      text: `
+        UPDATE articles 
+        SET votes = votes + ($1)
+        WHERE article_id = $2
+        RETURNING *`,
+      values: [votes, id],
     });
-  }
-
-  const result = await db.query({
-    text: `
-      UPDATE articles 
-      SET votes = votes + ($1)
-      WHERE article_id = $2
-      RETURNING *`,
-    values: [votes, id],
-  });
-  return result.rows[0];
+    return result.rows[0];
+  
 };

@@ -195,18 +195,11 @@ describe("POST /api/articles/:article_id/comments", () => {
       .post("/api/articles/5/comments")
       .send(newComment)
       .expect(201)
-      .then(({ body: { comment } }) => {        
+      .then(({ body: { comment } }) => {                
         expect(comment.article_id).toBe(5)
-        expect(comment).toEqual(
-          expect.objectContaining({
-            author: expect.any(String),
-            body: expect.any(String),
-            created_at: expect.any(String),
-            votes: expect.any(Number),
-            comment_id: expect.any(Number),
-            article_id: expect.any(Number),
-          })
-        );
+        expect(Object.keys(comment).length).toBe(6)
+        expect(comment.body).toBe(newComment.body)
+        expect(comment.author).toBe(newComment.username)
       });
   });
   test("404: reject if article_id is wrong/invalid", () => {
@@ -246,7 +239,7 @@ describe("POST /api/articles/:article_id/comments", () => {
         expect(msg).toBe("Comment is required");
       });
   });
-  test("422: reject if username is wrong/invalid", () => {
+  test("404: reject if username is wrong/invalid", () => {
     const newComment = {
       username: "random_name",
       body: "my new comment",
@@ -264,16 +257,6 @@ describe("POST /api/articles/:article_id/comments", () => {
 describe("PATCH /api/articles/:article_id", () => {
   test("200: updates the article with the given id by increasing or decreasing the votes tally", () => {
     const newVotes = { inc_votes: -100 };
-    const article =   {
-      title: "Z",
-      topic: "mitch",
-      author: "icellusedkars",
-      body: "I was hungry.",
-      created_at: 1578406080000,
-      article_img_url:
-        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-    }
-
     return request(app)
       .patch("/api/articles/7")
       .send(newVotes)
