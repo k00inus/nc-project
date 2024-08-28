@@ -262,30 +262,28 @@ describe("POST /api/articles/:article_id/comments", () => {
 });
 
 describe("PATCH /api/articles/:article_id", () => {
-  test("200: edits the article with the given id", () => {
+  test("200: updates the article with the given id by increasing or decreasing the votes tally", () => {
     const newVotes = { inc_votes: -100 };
+    const article =   {
+      title: "Z",
+      topic: "mitch",
+      author: "icellusedkars",
+      body: "I was hungry.",
+      created_at: 1578406080000,
+      article_img_url:
+        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+    }
 
     return request(app)
       .patch("/api/articles/7")
       .send(newVotes)
       .expect(200)
-      .then(({ body: { article } }) => {         
-        expect(article.article_id).toBe(7)     
-        expect(article).toEqual(
-          expect.objectContaining({
-            title: expect.any(String),
-            topic: expect.any(String),
-            author: expect.any(String),
-            body: expect.any(String),
-            created_at: expect.any(String),
-            votes: expect.any(Number),
-            article_img_url: expect.any(String),
-            article_id: expect.any(Number),
-          })
-        );
+      .then(({ body: { article } }) => {                 
+        expect(article.article_id).toBe(7) 
+        expect(article.votes).toBe(newVotes.inc_votes)
       });
   });
-  test("404: reject if article_id is wrong/invalid", () => {
+  test("404: reject if article_id does not exist", () => {
     const newVotes = { inc_votes: -100 };
     return request(app)
       .patch("/api/articles/456")
@@ -295,12 +293,22 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(msg).toBe("article_id 456 not found");
       });
   });
-  test("422: reject if no votes object is supplied", () => {
+  test("400: reject if article_id is invalid", () => {
+    const newVotes = { inc_votes: -100 };
+    return request(app)
+      .patch("/api/articles/banana")
+      .send(newVotes)
+      .expect(400)
+      .then(({ body: { msg } }) => {        
+        expect(msg).toBe("invalid request");
+      });
+  });
+  test("400: reject if no votes object is supplied", () => {
     const newVotes = { };
     return request(app)
-      .patch("/api/articles/456")
+      .patch("/api/articles/7")
       .send(newVotes)
-      .expect(422)
+      .expect(400)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("Input required");
       });
