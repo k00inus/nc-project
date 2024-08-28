@@ -107,6 +107,34 @@ describe("GET /api/articles", () => {
         });
       });
   });
+  test("200: returns an array of article objects sorted by a valid column name in descending order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=article_id")
+      .expect(200)
+      .then(({ body: { articles } }) => {        
+        expect(articles).toBeSortedBy("article_id", {
+          descending: true,
+        });
+      });
+  });
+  test("200: returns an array of article objects sorted by a valid column name in ascending order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=comment_count&order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {                
+        expect(articles).toBeSortedBy("comment_count", {
+          ascending: true,
+        });
+      });
+  });
+  test("400: reject if column name (sort_by) is invalid", () => {
+    return request(app)
+      .get("/api/articles?sort_by=username")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("invalid request");
+      });
+  });
 });
 
 describe("GET /api/articles/:article_id", () => {
