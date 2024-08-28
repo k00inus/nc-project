@@ -1,19 +1,39 @@
 const db = require("../db/connection");
-const checkExists = require('./utils.models')
+const {checkExists, formatQuery} = require("./utils.models");
 
-exports.fetchAllArticles = () => {
+exports.fetchAllArticles = async (sort_by, order) => {
+
   let query = {
     text: `
             SELECT a.author, a.title, a.article_id, a.topic, a.created_at, a.votes, a.article_img_url, CAST(COUNT(c.article_id) AS INT) AS comment_count 
             FROM articles a
             JOIN comments c on c.article_id = a.article_id 
             GROUP BY a.article_id
-            ORDER BY a.created_at DESC;`,
+            ORDER BY a.created_at DESC;
+            `,
   };
 
-  return db.query(query).then(({ rows }) => {
-    return rows;
-  });
+  if (sort_by) {
+    const columnNames = ["author", "title", "article_id", 'topic', 'created_at', 'votes', 'comment_count'];
+    console.log(order, 'in mods');
+    if (columnNames.includes(sort_by)) {
+      if (order === undefined) {
+        order = 'desc'
+      }
+      console.log(order, 'in mods 2');
+      
+      
+     query = formatQuery(sort_by, order)
+     
+      
+    } else {
+      return Promise.reject({ status: 400, msg: "invalid request" });
+    }
+  }
+  
+  const result = await db.query(query)
+  
+  return result.rows;
 };
 
 exports.selectArticleById = (id) => {
@@ -36,7 +56,7 @@ exports.fetchCommentsByArticleId = async (id) => {
   if (!id) {
     return Promise.reject({ status: 400, msg: "Id required" });
   } else {
-    await checkExists('articles', 'article_id', id)
+    await checkExists("articles", "article_id", id);
   }
 
   const result = await db.query({
@@ -60,12 +80,12 @@ exports.postComment = async (id, author, comment) => {
   if (!author) {
     return Promise.reject({ status: 422, msg: "username is required" });
   } else {
-    await checkExists('users', 'username', author)
+    await checkExists("users", "username", author);
   }
   if (!id) {
     return Promise.reject({ status: 400, msg: "Id required" });
   } else {
-    await checkExists('articles', 'article_id', id)
+    await checkExists("articles", "article_id", id);
   }
   const result = await db.query({
     text: `
@@ -78,24 +98,22 @@ exports.postComment = async (id, author, comment) => {
 };
 
 exports.editArticle = async (id, votes) => {
- 
-    if (!votes) {
-      return Promise.reject({ status: 400, msg: "Input required" });
-    }
-    if (!id) {
-      return Promise.reject({ status: 400, msg: "Id required" });
-    } else {
-      await checkExists('articles', 'article_id', id)
-    }
-  
-    const result = await db.query({
-      text: `
+  if (!votes) {
+    return Promise.reject({ status: 400, msg: "Input required" });
+  }
+  if (!id) {
+    return Promise.reject({ status: 400, msg: "Id required" });
+  } else {
+    await checkExists("articles", "article_id", id);
+  }
+
+  const result = await db.query({
+    text: `
         UPDATE articles 
         SET votes = votes + ($1)
         WHERE article_id = $2
         RETURNING *`,
-      values: [votes, id],
-    });
-    return result.rows[0];
-  
+    values: [votes, id],
+  });
+  return result.rows[0];
 };

@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-const checkExists = require("./utils.models");
+const {checkExists} = require("./utils.models");
 
 exports.deleteComment = async (id) => {
   if (!id) {

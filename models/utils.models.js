@@ -17,6 +17,28 @@ const checkExists = async (table_name, column_name, id) => {
     });
   }
 };
-//console.log(checkIdExists("articles", "article_id", id));
 
-module.exports = checkExists;
+const formatQuery = (sort_by, order) => {
+  
+  
+
+  console.log(order, 'in utis');
+  
+  let query = format(
+    `
+    SELECT a.author, a.title, a.article_id, a.topic, a.created_at, a.votes, a.article_img_url, CAST(COUNT(c.article_id) AS INT) 
+    AS comment_count 
+    FROM articles a JOIN comments c on c.article_id = a.article_id 
+    GROUP BY a.article_id 
+    ORDER BY %I %s;
+    `,
+    sort_by,
+    order
+  );
+
+  return query
+};
+
+
+
+module.exports = {checkExists, formatQuery}

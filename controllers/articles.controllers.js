@@ -1,8 +1,11 @@
 const { selectArticleById, fetchAllArticles, fetchCommentsByArticleId, postComment, editArticle, } = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
-  fetchAllArticles()
-    .then((articles) => {
+  const { sort_by, order } = req.query;  
+  console.log(order, 'in conts');
+  
+  fetchAllArticles(sort_by, order)
+    .then((articles) => {      
       res.status(200).send({ articles });
     })
     .catch((err) => {
