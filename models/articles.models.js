@@ -32,31 +32,66 @@ exports.selectArticleById = (id) => {
 };
 
 exports.fetchCommentsByArticleId = async (id) => {
-  try {
-    const existResult = await db.query({
-      text: "SELECT EXISTS (SELECT * FROM articles WHERE article_id = $1)",
-      values: [id],
-    });
-    if (!existResult.rows[0].exists) {
-      return Promise.reject({ status: 404, msg: `article_id ${id} not found` });
-    }
+  const existResult = await db.query({
+    text: "SELECT EXISTS (SELECT * FROM articles WHERE article_id = $1)",
+    values: [id],
+  });
+  if (!existResult.rows[0].exists) {
+    return Promise.reject({ status: 404, msg: `article_id ${id} not found` });
+  }
 
-    const result = await db.query({
-      text: `
+  const result = await db.query({
+    text: `
         SELECT * FROM comments
         WHERE article_id = $1
         ORDER BY created_at DESC;
         `,
+    values: [id],
+  });
+  if (result.rows.length === 0) {
+    return [];
+  }
+  return result.rows;
+};
+
+exports.postComment = async (id, author, comment) => {
+  if (!comment) {
+    return Promise.reject({ status: 422, msg: "Comment is required" });
+  }
+  if (!author) {
+    return Promise.reject({ status: 422, msg: "username is required" });
+  } else {
+    const existResult = await db.query({
+      text: "SELECT EXISTS (SELECT * FROM users WHERE username = $1)",
+      values: [author],
+    });
+    if (!existResult.rows[0].exists) {
+      return Promise.reject({
+        status: 404,
+        msg: `username ${author} not found`,
+      });
+    }
+  }
+  if (!id) {
+    return Promise.reject({ status: 422, msg: "article_id is required" });
+  } else {
+    const existResult = await db.query({
+      text: "SELECT EXISTS (SELECT * FROM articles WHERE article_id  = $1)",
       values: [id],
     });
-    if (result.rows.length === 0) {
-      return [];
+    if (!existResult.rows[0].exists) {
+      return Promise.reject({
+        status: 404,
+        msg: `article_id ${id} not found`,
+      });
     }
-    return result.rows;
-  } catch (err) {
-    if (err.code === "22P02") {
-      return Promise.reject({ status: 400, msg: "invalid request" });
-    }
-    return err;
   }
+  const result = await db.query({
+    text: `
+          INSERT INTO comments (author, body, article_id) 
+          VALUES ($1, $2, $3)
+          RETURNING *;`,
+    values: [author, comment, id],
+  });
+  return result.rows[0];
 };

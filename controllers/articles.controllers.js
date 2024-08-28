@@ -1,4 +1,4 @@
-const { selectArticleById, fetchAllArticles, fetchCommentsByArticleId, } = require("../models/articles.models");
+const { selectArticleById, fetchAllArticles, fetchCommentsByArticleId, postComment, } = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
   fetchAllArticles()
@@ -28,8 +28,23 @@ exports.getCommentsByArticleId = (req, res, next) => {
       res.status(200).send({ comments });
     })
     .catch((err) => {
-      console.log(err, 'in cont');
+      ;
       
+      if (err.code === "22P02") {
+        res.status(400).send({ status: 400, msg: "invalid request" });
+      }
+      next(err);
+    });
+};
+
+exports.postCommentByArticleId = (req, res, next) => {
+  const { article_id } = req.params;
+  const { username, body } = req.body;
+  postComment(article_id, username, body)
+    .then((comment) => {
+      return res.status(201).send({ comment });
+    })
+    .catch((err) => {
       next(err);
     });
 };
