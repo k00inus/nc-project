@@ -89,7 +89,8 @@
     }
   },
   "PATCH /api/articles/:article_id": {
-    "description": "edits the article with the given id ",
+    "description": "Updates the article with the given id by increasing or decreasing the votes tally ",
+    "exampleInput": {"inc_votes": -100},
     "queries": [],
     "exampleResponse": {
       "article": {

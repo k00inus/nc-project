@@ -98,13 +98,13 @@ exports.postComment = async (id, author, comment) => {
 
 exports.editArticle = async (id, votes) => {
   if (!votes) {
-    return Promise.reject({ status: 422, msg: "Input required" });
+    return Promise.reject({ status: 400, msg: "Input required" });
   }
-  const existResult = await db.query({
+  const checkIfIdIsValid = await db.query({
     text: "SELECT EXISTS (SELECT * FROM articles WHERE article_id  = $1)",
     values: [id],
   });
-  if (!existResult.rows[0].exists) {
+  if (!checkIfIdIsValid.rows[0].exists) {
     return Promise.reject({
       status: 404,
       msg: `article_id ${id} not found`,
