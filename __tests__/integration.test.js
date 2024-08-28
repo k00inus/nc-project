@@ -184,3 +184,79 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: adds a comment for an article", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "my new comment",
+    };
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send(newComment)
+      .expect(201)
+      .then(({ body: { comment } }) => {        
+        expect(comment.article_id).toBe(5)
+        expect(comment).toEqual(
+          expect.objectContaining({
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            comment_id: expect.any(Number),
+            article_id: expect.any(Number),
+          })
+        );
+      });
+  });
+  test("404: reject if article_id is wrong/invalid", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "my new comment",
+    };
+    return request(app)
+    .post("/api/articles/555/comments")
+    .send(newComment)
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("article_id 555 not found");
+      });
+  })
+  test("422: username not supplied", () => {
+    const newComment = {
+      body: "my new comment",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(newComment)
+      .expect(422)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("username is required");
+      });
+  });
+  test("422: reject if a comment is omitted", () => {
+    const newComment = {
+      username: "butter_bridge",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(newComment)
+      .expect(422)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Comment is required");
+      });
+  });
+  test("422: reject if username is wrong/invalid", () => {
+    const newComment = {
+      username: "random_name",
+      body: "my new comment",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(newComment)
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("username random_name not found");
+      });
+  });
+});
