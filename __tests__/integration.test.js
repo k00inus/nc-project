@@ -188,12 +188,13 @@ describe("GET /api/articles", () => {
   });
 });
 
-describe("GET /api/articles/:article_id", () => {
+describe.only("GET /api/articles/:article_id", () => {
   test("200: returns an article object", () => {
     return request(app)
       .get("/api/articles/1")
       .expect(200)
       .then(({ body: { article } }) => {
+        expect(article[0].comment_count).toBe(11)
         expect(article[0]).toEqual(
           expect.objectContaining({
             title: expect.any(String),
@@ -204,6 +205,7 @@ describe("GET /api/articles/:article_id", () => {
             votes: expect.any(Number),
             article_img_url: expect.any(String),
             article_id: expect.any(Number),
+            comment_count: expect.any(Number),
           })
         );
       });
