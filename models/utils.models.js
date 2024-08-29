@@ -19,7 +19,6 @@ const checkExists = async (table_name, column_name, id) => {
 };
 
 const formatQuery = (sort_by, order) => {
-    
   let query = format(
     `
     SELECT a.author, a.title, a.article_id, a.topic, a.created_at, a.votes, a.article_img_url, CAST(COUNT(c.article_id) AS INT) 
@@ -32,9 +31,41 @@ const formatQuery = (sort_by, order) => {
     order
   );
 
-  return query
+  return query;
 };
 
+const formatTopics = (topic) => {
+  let query = format(
+    `
+    SELECT a.author, a.title, a.article_id, a.topic, a.created_at, a.votes, a.article_img_url, CAST(COUNT(c.article_id) AS INT) 
+    AS comment_count 
+    FROM articles a JOIN comments c on c.article_id = a.article_id 
+    WHERE topic = %L
+    GROUP BY a.article_id
+    ORDER BY created_at DESC;
+    `,
+    topic
+  );
+  return query;
+};
 
+const checkTopics = async (table_name, column_name, topic) => {
+  const query = format(
+    "SELECT EXISTS (SELECT * FROM %I WHERE %I  = %L)",
+    table_name,
+    column_name,
+    topic
+  );
 
-module.exports = {checkExists, formatQuery}
+  const checkIfTopicIsValid = await db.query(query);
+  if (!checkIfTopicIsValid.rows[0].exists) {
+    return Promise.reject({
+      status: 404,
+      msg: `Topic ${topic} not found`,
+    });
+  } else {
+    return true;
+  }
+};
+
+module.exports = { checkExists, formatQuery, formatTopics, checkTopics };
