@@ -1,8 +1,12 @@
 const db = require("../db/connection");
-const {checkExists, formatQuery} = require("./utils.models");
+const {
+  checkExists,
+  formatQuery,
+  formatTopics,
+  checkTopics,
+} = require("./utils.models");
 
-exports.fetchAllArticles = async (sort_by, order) => {
-
+exports.fetchAllArticles = async (sort_by, order, topic) => {
   let query = {
     text: `
             SELECT a.author, a.title, a.article_id, a.topic, a.created_at, a.votes, a.article_img_url, CAST(COUNT(c.article_id) AS INT) AS comment_count 
@@ -14,23 +18,38 @@ exports.fetchAllArticles = async (sort_by, order) => {
   };
 
   if (sort_by) {
-    const columnNames = ["author", "title", "article_id", 'topic', 'created_at', 'votes', 'comment_count'];
+    const columnNames = [
+      "author",
+      "title",
+      "article_id",
+      "topic",
+      "created_at",
+      "votes",
+      "comment_count",
+    ];
+
     if (columnNames.includes(sort_by)) {
       if (order === undefined) {
-        order = 'desc'
+        order = "desc";
       }
-      
-      
-     query = formatQuery(sort_by, order)
-     
-      
+
+      query = formatQuery(sort_by, order);
     } else {
       return Promise.reject({ status: 400, msg: "invalid request" });
     }
   }
-  
-  const result = await db.query(query)
-  
+
+  if (topic) {
+    const topics = await checkTopics("topics", "slug", topic);
+    if (topics) {
+      query = formatTopics(topic);
+    } else {
+      return Promise.reject({ status: 400, msg: "invalid request" });
+    }
+  }
+
+  const result = await db.query(query);
+
   return result.rows;
 };
 

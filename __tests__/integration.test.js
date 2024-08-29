@@ -127,12 +127,34 @@ describe("GET /api/articles", () => {
         });
       });
   });
+  test("200: returns an array of filtered article objects with the topic value specified in the query", () => {
+    const topic = 'mitch';
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body: { articles } }) => {                
+        expect(articles.length).toBe(4)
+        for (const article of articles) {
+          expect(article.topic).toBe(topic)
+        }
+        
+      });
+  });
   test("400: reject if column name (sort_by) is invalid", () => {
     return request(app)
       .get("/api/articles?sort_by=username")
       .expect(400)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("invalid request");
+      });
+  });
+  test("404: reject if topic does not exist", () => {
+    const topic = 'invalidtopic';
+    return request(app)
+      .get("/api/articles?topic=invalidtopic")
+      .expect(404)
+      .then(({ body: {msg}}) => {        
+        expect(msg).toBe(`Topic ${topic} not found`);
       });
   });
 });
