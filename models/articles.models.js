@@ -37,12 +37,25 @@ exports.fetchAllArticles = async (sort_by, order, topic) => {
     } else {
       return Promise.reject({ status: 400, msg: "invalid request" });
     }
+  } else if (order) {
+    if (sort_by === undefined) {
+      sort_by = "created_at";
+      query = formatQuery(sort_by, order);
+    } else {
+      return Promise.reject({ status: 400, msg: "invalid request" });
+    }
   }
-
   if (topic) {
+
+    
     const topics = await checkTopics("topics", "slug", topic);
     if (topics) {
-      query = formatTopics(topic);
+      if (sort_by === undefined || order === undefined) {
+        order = "desc";
+        sort_by = "created_at";
+
+        query = formatTopics(topic, sort_by, order);
+      }
     } else {
       return Promise.reject({ status: 400, msg: "invalid request" });
     }

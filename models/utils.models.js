@@ -34,7 +34,8 @@ const formatQuery = (sort_by, order) => {
   return query;
 };
 
-const formatTopics = (topic) => {
+const formatTopics = (topic, sort_by, order) => {
+
   let query = format(
     `
     SELECT a.author, a.title, a.article_id, a.topic, a.created_at, a.votes, a.article_img_url, CAST(COUNT(c.article_id) AS INT) 
@@ -42,10 +43,12 @@ const formatTopics = (topic) => {
     FROM articles a FULL JOIN comments c on c.article_id = a.article_id 
     WHERE topic = %L
     GROUP BY a.article_id
-    ORDER BY created_at DESC;
+    ORDER BY %I %s;
     `,
-    topic
-  );
+    topic,
+    sort_by,
+    order
+  );  
   return query;
 };
 

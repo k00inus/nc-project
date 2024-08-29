@@ -129,6 +129,16 @@ describe("GET /api/articles", () => {
         });
       });
   });
+  test("200: returns an array of article objects in ascending or descending order", () => {
+    return request(app)
+      .get("/api/articles?order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {                
+        expect(articles).toBeSortedBy("created_at", {
+          ascending: true,
+        });
+      });
+  });
   test("200: returns an array of filtered article objects with the topic value specified in the query", () => {
     const topic = 'mitch';
     return request(app)
@@ -166,6 +176,14 @@ describe("GET /api/articles", () => {
       .expect(404)
       .then(({ body: {msg}}) => {        
         expect(msg).toBe(`Topic ${topic} not found`);
+      });
+  });
+  test("400: reject if order query (e.g., order=test) is invalid", () => {
+    return request(app)
+      .get("/api/articles?order=random")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("invalid request");
       });
   });
 });
@@ -213,7 +231,7 @@ describe("GET /api/articles/:article_id/comments", () => {
     return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
-      .then(({ body: { comments } }) => {
+      .then(({ body: { comments } }) => {        
         for (const comment of comments) {
           expect(comment.article_id).toBe(1);
           expect(comment).toEqual(
