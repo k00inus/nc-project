@@ -23,7 +23,7 @@ const formatQuery = (sort_by, order) => {
     `
     SELECT a.author, a.title, a.article_id, a.topic, a.created_at, a.votes, a.article_img_url, CAST(COUNT(c.article_id) AS INT) 
     AS comment_count 
-    FROM articles a JOIN comments c on c.article_id = a.article_id 
+    FROM articles a FULL JOIN comments c on c.article_id = a.article_id 
     GROUP BY a.article_id 
     ORDER BY %I %s;
     `,
@@ -39,7 +39,7 @@ const formatTopics = (topic) => {
     `
     SELECT a.author, a.title, a.article_id, a.topic, a.created_at, a.votes, a.article_img_url, CAST(COUNT(c.article_id) AS INT) 
     AS comment_count 
-    FROM articles a JOIN comments c on c.article_id = a.article_id 
+    FROM articles a FULL JOIN comments c on c.article_id = a.article_id 
     WHERE topic = %L
     GROUP BY a.article_id
     ORDER BY created_at DESC;
