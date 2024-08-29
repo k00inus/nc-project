@@ -58,7 +58,8 @@ describe("GET /api/users", () => {
     return request(app)
       .get("/api/users")
       .expect(200)
-      .then(({ body: { users } }) => {        
+      .then(({ body: { users } }) => { 
+        expect(users.length).toBe(4)               
         for (const user of users) {
           if (user !== 0) {
             expect(user).toEqual(
@@ -80,6 +81,7 @@ describe("GET /api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(13)       
         for (const article of articles) {
           expect(article).toEqual(
             expect.objectContaining({
@@ -132,12 +134,21 @@ describe("GET /api/articles", () => {
     return request(app)
       .get("/api/articles?topic=mitch")
       .expect(200)
-      .then(({ body: { articles } }) => {                
-        expect(articles.length).toBe(4)
+      .then(({ body: { articles } }) => {                        
+        expect(articles.length).toBe(12)
         for (const article of articles) {
           expect(article.topic).toBe(topic)
         }
         
+      });
+  });
+  test("200: returns an empty array if topic exists but no entries", () => {
+    const topic = 'paper';
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({ body: { articles } }) => {                     
+        expect(articles.length).toBe(0) 
       });
   });
   test("400: reject if column name (sort_by) is invalid", () => {
