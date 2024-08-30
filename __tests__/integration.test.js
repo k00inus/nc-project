@@ -418,7 +418,49 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 });
-
+describe.only("PATCH /api/comments/:comment_id", () => {
+  test("200: updates the votes property on a comment object with the given id by increasing or decreasing the votes tally", () => {
+    const newVotes = { inc_votes: -100 };
+    return request(app)
+      .patch("/api/comments/7")
+      .send(newVotes)
+      .expect(200)
+      .then(({ body: { comment } }) => {        
+        expect(comment.comment_id).toBe(7);
+        expect(comment.votes).toBe(newVotes.inc_votes);
+      });
+  });
+  test("404: reject if comment_id does not exist", () => {
+    const newVotes = { inc_votes: -100 };
+    return request(app)
+      .patch("/api/comments/456")
+      .send(newVotes)
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("comment_id 456 not found");
+      });
+  });
+  test("400: reject if comment_id is invalid", () => {
+    const newVotes = { inc_votes: -100 };
+    return request(app)
+      .patch("/api/comments/banana")
+      .send(newVotes)
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("invalid request");
+      });
+  });
+  test("400: reject if no votes object is supplied", () => {
+    const newVotes = {};
+    return request(app)
+      .patch("/api/comments/7")
+      .send(newVotes)
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Input required");
+      });
+  });
+});
 describe("DELETE /api/comments/:comment_id", () => {
   test("204: deletes the comment with the given id", () => {
     return request(app).delete("/api/comments/7").expect(204);
