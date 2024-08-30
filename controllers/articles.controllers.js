@@ -1,8 +1,9 @@
 const { selectArticleById, fetchAllArticles, fetchCommentsByArticleId, postComment, editArticle, postArticle, } = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
-  const { sort_by, order, topic } = req.query;    
-  fetchAllArticles(sort_by, order, topic)
+  const { sort_by, order, topic, limit, p } = req.query; 
+       
+  fetchAllArticles(sort_by, order, topic, limit, p)
     .then((articles) => {      
       res.status(200).send({ articles });
     })
@@ -51,6 +52,7 @@ exports.postCommentByArticleId = (req, res, next) => {
 };
 exports.postArticle = (req, res, next) => {
   const { author, title, body, topic } = req.body;
+  
   postArticle(author, title, body, topic )
     .then((article) => {
       return res.status(201).send({ article });
