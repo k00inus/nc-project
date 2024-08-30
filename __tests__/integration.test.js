@@ -227,6 +227,28 @@ describe("GET /api/articles/:article_id", () => {
   });
 });
 
+describe("GET /api/users/:username", () => {
+  test("200: returns an article object", () => {
+    return request(app)
+      .get("/api/users/icellusedkars")
+      .expect(200)
+      .then(({ body: { user: [content] } }) => {           
+        expect(content.username).toBe('icellusedkars')
+        expect(typeof content.avatar_url).toBe('string')
+        expect(typeof content.name).toBe('string')
+      });
+  });
+  test("404: wrong username", () => {
+    const username = "icellusedka"
+    return request(app)
+      .get("/api/users/icellusedka")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(`username ${username} not found`);
+      });
+  });
+});
+
 describe("GET /api/articles/:article_id/comments", () => {
   test("200: returns an array of comments for the given article_id", () => {
     return request(app)
