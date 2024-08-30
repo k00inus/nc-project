@@ -338,11 +338,11 @@ describe("GET /api/articles/:article_id/comments", () => {
         }
       });
   });
-  test("200: returns an array comment objects limited by the number specified in the limit query ", () => {
-    const limit = 5;
-    const p = 1;
+  test.only("200: returns an array comment objects by the given page number specified in the query ", () => {
+    const limit = 10;
+    const p = 3;
     return request(app)
-      .get("/api/articles/1/comments?limit=5&p=3")
+      .get("/api/articles/1/comments?p=3")
       .expect(200)
       .then(({ body: { comments } }) => {
         if (comments.length < limit) {

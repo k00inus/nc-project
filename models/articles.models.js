@@ -129,15 +129,22 @@ exports.fetchCommentsByArticleId = async (id, limit, p) => {
   } else {
     await checkExists("articles", "article_id", id);
   }
-  if (limit || p) {
-    if (typeof Number(limit) !== 'number' || typeof Number(p) !== 'number') {
-      return Promise.reject({ status: 400, msg: "limit or page input must be number" });
-    } else  if (limit === undefined || p === undefined) {
-      limit = 10;
+  if (limit ) {
+    if (typeof Number(limit) !== 'number') {
+      return Promise.reject({ status: 400, msg: "limit  input must be number" });
+    } else  if (p === undefined ) {
       p = 1;
     }
   }
- 
+
+  if (p ) {
+    if (typeof Number(p) !== 'number') {
+      return Promise.reject({ status: 400, msg: "page input must be number" });
+    } else  if (limit === undefined ) {
+      limit = 10;
+    }
+  }
+   
   const result = await db.query({
     text: `
         SELECT *, CAST(COUNT(*) OVER () as INT) AS total_count FROM comments
