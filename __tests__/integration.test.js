@@ -58,8 +58,8 @@ describe("GET /api/users", () => {
     return request(app)
       .get("/api/users")
       .expect(200)
-      .then(({ body: { users } }) => { 
-        expect(users.length).toBe(4)               
+      .then(({ body: { users } }) => {
+        expect(users.length).toBe(4);
         for (const user of users) {
           if (user !== 0) {
             expect(user).toEqual(
@@ -80,7 +80,7 @@ describe("GET /api/articles", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
-      .then(({ body: { articles } }) => {        
+      .then(({ body: { articles } }) => {
         for (const article of articles) {
           expect(article).toEqual(
             expect.objectContaining({
@@ -112,7 +112,7 @@ describe("GET /api/articles", () => {
     return request(app)
       .get("/api/articles?sort_by=article_id")
       .expect(200)
-      .then(({ body: { articles } }) => {        
+      .then(({ body: { articles } }) => {
         expect(articles).toBeSortedBy("article_id", {
           descending: true,
         });
@@ -122,7 +122,7 @@ describe("GET /api/articles", () => {
     return request(app)
       .get("/api/articles?sort_by=comment_count&order=asc")
       .expect(200)
-      .then(({ body: { articles } }) => {                
+      .then(({ body: { articles } }) => {
         expect(articles).toBeSortedBy("comment_count", {
           ascending: true,
         });
@@ -132,32 +132,31 @@ describe("GET /api/articles", () => {
     return request(app)
       .get("/api/articles?order=asc")
       .expect(200)
-      .then(({ body: { articles } }) => {                
+      .then(({ body: { articles } }) => {
         expect(articles).toBeSortedBy("created_at", {
           ascending: true,
         });
       });
   });
   test("200: returns an array of filtered article objects with the topic value specified in the query", () => {
-    const topic = 'mitch';
+    const topic = "mitch";
     return request(app)
       .get("/api/articles?topic=mitch")
       .expect(200)
-      .then(({ body: { articles } }) => {                        
-        expect(articles.length).toBe(10)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(10);
         for (const article of articles) {
-          expect(article.topic).toBe(topic)
+          expect(article.topic).toBe(topic);
         }
-        
       });
   });
   test("200: returns an empty array if topic exists but no entries", () => {
-    const topic = 'paper';
+    const topic = "paper";
     return request(app)
       .get("/api/articles?topic=paper")
       .expect(200)
-      .then(({ body: { articles } }) => {                     
-        expect(articles.length).toBe(0) 
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(0);
       });
   });
   test("200: returns an array article objects limited by the number specified in the limit query ", () => {
@@ -165,28 +164,26 @@ describe("GET /api/articles", () => {
     return request(app)
       .get("/api/articles?topic=cats&limit=5&p=1")
       .expect(200)
-      .then(({ body: { articles } }) => {          
-        if (articles.length < 5) {
-          expect(articles.length).toBe(articles.length)
-        } else{
-          expect(articles.length).toBe(limit)
-        }                     
-        
+      .then(({ body: { articles } }) => {
+        if (articles.length < limit) {
+          expect(articles.length).toBe(articles.length);
+        } else {
+          expect(articles.length).toBe(limit);
+        }
       });
   });
-  test.only("200: returns an array article objects page by the number specified in the page query ", () => {
+  test("200: returns an array article objects page by the number specified in the page query ", () => {
     const p = 2;
-    const limit = 10
+    const limit = 10;
     return request(app)
       .get("/api/articles?topic=mitch&p=2")
       .expect(200)
-      .then(({ body: { articles } }) => {          
-        if (articles.length < 5) {
-          expect(articles.length).toBe(articles.length)
-        } else{
-          expect(articles.length).toBe(limit)
-        }                     
-        
+      .then(({ body: { articles } }) => {
+        if (articles.length < limit) {
+          expect(articles.length).toBe(articles.length);
+        } else {
+          expect(articles.length).toBe(limit);
+        }
       });
   });
   test("400: reject if column name (sort_by) is invalid", () => {
@@ -198,11 +195,11 @@ describe("GET /api/articles", () => {
       });
   });
   test("404: reject if topic does not exist", () => {
-    const topic = 'invalidtopic';
+    const topic = "invalidtopic";
     return request(app)
       .get("/api/articles?topic=invalidtopic&limit=4")
       .expect(404)
-      .then(({ body: {msg}}) => {        
+      .then(({ body: { msg } }) => {
         expect(msg).toBe(`Topic ${topic} not found`);
       });
   });
@@ -221,21 +218,27 @@ describe("GET /api/articles/:article_id", () => {
     return request(app)
       .get("/api/articles/1")
       .expect(200)
-      .then(({ body: { article: [content] } }) => {   
-        expect(content.comment_count).toBe(11)   
-        expect(content).toEqual(
-          expect.objectContaining({
-            title: expect.any(String),
-            topic: expect.any(String),
-            author: expect.any(String),
-            body: expect.any(String),
-            created_at: expect.any(String),
-            votes: expect.any(Number),
-            article_img_url: expect.any(String),
-            article_id: expect.any(Number),
-          })
-        );
-      });
+      .then(
+        ({
+          body: {
+            article: [content],
+          },
+        }) => {
+          expect(content.comment_count).toBe(11);
+          expect(content).toEqual(
+            expect.objectContaining({
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              article_id: expect.any(Number),
+            })
+          );
+        }
+      );
   });
   test("404: wrong article_id", () => {
     return request(app)
@@ -260,14 +263,20 @@ describe("GET /api/users/:username", () => {
     return request(app)
       .get("/api/users/icellusedkars")
       .expect(200)
-      .then(({ body: { user: [content] } }) => {           
-        expect(content.username).toBe('icellusedkars')
-        expect(typeof content.avatar_url).toBe('string')
-        expect(typeof content.name).toBe('string')
-      });
+      .then(
+        ({
+          body: {
+            user: [content],
+          },
+        }) => {
+          expect(content.username).toBe("icellusedkars");
+          expect(typeof content.avatar_url).toBe("string");
+          expect(typeof content.name).toBe("string");
+        }
+      );
   });
   test("404: wrong username", () => {
-    const username = "icellusedka"
+    const username = "icellusedka";
     return request(app)
       .get("/api/users/icellusedka")
       .expect(404)
@@ -282,7 +291,7 @@ describe("GET /api/articles/:article_id/comments", () => {
     return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
-      .then(({ body: { comments } }) => {        
+      .then(({ body: { comments } }) => {
         for (const comment of comments) {
           expect(comment.article_id).toBe(1);
           expect(comment).toEqual(
@@ -316,6 +325,33 @@ describe("GET /api/articles/:article_id/comments", () => {
         expect(comments).toEqual([]);
       });
   });
+  test("200: returns an array comment objects limited by the number specified in the limit query ", () => {
+    const limit = 5;
+    return request(app)
+      .get("/api/articles/4/comments?limit=5&p=1")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        if (comments.length < limit) {
+          expect(comments.length).toBe(comments.length);
+        } else {
+          expect(comments.length).toBe(limit);
+        }
+      });
+  });
+  test.only("200: returns an array comment objects by the given page number specified in the query ", () => {
+    const limit = 10;
+    const p = 3;
+    return request(app)
+      .get("/api/articles/1/comments?p=3")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        if (comments.length < limit) {
+          expect(comments.length).toBe(comments.length);
+        } else {
+          expect(comments.length).toBe(limit);
+        }
+      });
+  });
   test("404: wrong article_id", () => {
     return request(app)
       .get("/api/articles/100/comments")
@@ -332,8 +368,17 @@ describe("GET /api/articles/:article_id/comments", () => {
         expect(msg).toBe("invalid request");
       });
   });
+  test("400: reject if limit or page value is not a number", () => {
+    const limit = "set";
+    const p = 1;
+    return request(app)
+      .get("/api/articles/1/comments?limit=set&p=3")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("invalid request");
+      })
+  });
 });
-
 describe("POST /api/articles/", () => {
   test("201: adds a comment for an article", () => {
     const newComment = {
@@ -404,17 +449,17 @@ describe("POST /api/articles/", () => {
 });
 describe("POST /api/articles", () => {
   test("201: adds a new article", () => {
-    const newArticle= {
+    const newArticle = {
       author: "butter_bridge",
       title: "my new article",
       body: "my new article body",
-      topic: "paper"
+      topic: "paper",
     };
     return request(app)
       .post("/api/articles")
       .send(newArticle)
       .expect(201)
-      .then(({ body: { article} }) => {
+      .then(({ body: { article } }) => {
         expect(article.topic).toBe(newArticle.topic);
         expect(article.title).toBe(newArticle.title);
         expect(Object.keys(article).length).toBe(9);
@@ -424,11 +469,11 @@ describe("POST /api/articles", () => {
       });
   });
   test("404: reject if username is wrong/invalid", () => {
-    const newArticle= {
+    const newArticle = {
       author: "butter_bridg",
       title: "my new article",
       body: "my new article body",
-      topic: "random"
+      topic: "random",
     };
     return request(app)
       .post("/api/articles")
@@ -439,11 +484,11 @@ describe("POST /api/articles", () => {
       });
   });
   test("404: reject if topic is wrong/invalid", () => {
-    const newArticle= {
+    const newArticle = {
       author: "butter_bridge",
       title: "my new article",
       body: "my new article body",
-      topic: "random"
+      topic: "random",
     };
     return request(app)
       .post("/api/articles")
@@ -454,11 +499,11 @@ describe("POST /api/articles", () => {
       });
   });
   test("422: topic not supplied", () => {
-    const newArticle= {
+    const newArticle = {
       author: "butter_bridge",
       title: "my new article",
       body: "my new article body",
-    }
+    };
     return request(app)
       .post("/api/articles")
       .send(newArticle)
@@ -468,11 +513,11 @@ describe("POST /api/articles", () => {
       });
   });
   test("422: author not supplied", () => {
-    const newArticle= {
+    const newArticle = {
       title: "my new article",
       body: "my new article body",
-      topic:  "paper"
-    }
+      topic: "paper",
+    };
     return request(app)
       .post("/api/articles")
       .send(newArticle)
@@ -482,10 +527,10 @@ describe("POST /api/articles", () => {
       });
   });
   test("422: reject if the title is omitted", () => {
-    const newArticle= {
+    const newArticle = {
       author: "butter_bridge",
       body: "my new article body",
-      topic:  "paper"
+      topic: "paper",
     };
     return request(app)
       .post("/api/articles")
@@ -496,10 +541,10 @@ describe("POST /api/articles", () => {
       });
   });
   test("422: reject if the body is omitted", () => {
-    const newArticle= {
+    const newArticle = {
       author: "butter_bridge",
       title: "my new article",
-      topic:  "paper"
+      topic: "paper",
     };
     return request(app)
       .post("/api/articles")
@@ -509,7 +554,6 @@ describe("POST /api/articles", () => {
         expect(msg).toBe("article body is required");
       });
   });
-
 });
 
 describe("PATCH /api/articles/:article_id", () => {
@@ -562,7 +606,7 @@ describe("PATCH /api/comments/:comment_id", () => {
       .patch("/api/comments/7")
       .send(newVotes)
       .expect(200)
-      .then(({ body: { comment } }) => {        
+      .then(({ body: { comment } }) => {
         expect(comment.comment_id).toBe(7);
         expect(comment.votes).toBe(newVotes.inc_votes);
       });

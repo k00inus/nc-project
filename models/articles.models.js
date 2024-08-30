@@ -123,20 +123,36 @@ exports.selectArticleById = (id) => {
   });
 };
 
-exports.fetchCommentsByArticleId = async (id) => {
+exports.fetchCommentsByArticleId = async (id, limit, p) => {
   if (!id) {
     return Promise.reject({ status: 400, msg: "Id required" });
   } else {
     await checkExists("articles", "article_id", id);
   }
+  if (limit ) {
+    if (typeof Number(limit) !== 'number') {
+      return Promise.reject({ status: 400, msg: "limit  input must be number" });
+    } else  if (p === undefined ) {
+      p = 1;
+    }
+  }
 
+  if (p ) {
+    if (typeof Number(p) !== 'number') {
+      return Promise.reject({ status: 400, msg: "page input must be number" });
+    } else  if (limit === undefined ) {
+      limit = 10;
+    }
+  }
+   
   const result = await db.query({
     text: `
-        SELECT * FROM comments
+        SELECT *, CAST(COUNT(*) OVER () as INT) AS total_count FROM comments
         WHERE article_id = $1
-        ORDER BY created_at DESC;
+        ORDER BY created_at DESC
+        LIMIT $2 OFFSET ($2 * ($3 - 1));
         `,
-    values: [id],
+    values: [id, limit, p],
   });
   if (result.rows.length === 0) {
     return [];
