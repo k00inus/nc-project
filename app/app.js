@@ -23,4 +23,8 @@ app.use(customErrorHandler);
 // 500 errors
 app.use(serverErrorsHandler);
 
+app.all("*", (req, res) => {
+  res. status (404) .send({msg: "That page does not exist, check your url"})
+})
+
 module.exports = app;

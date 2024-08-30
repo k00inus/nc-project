@@ -4,16 +4,18 @@ const {
   formatQuery,
   formatTopics,
   checkTopics,
+  formatLimit,
 } = require("./utils.models");
 
-exports.fetchAllArticles = async (sort_by, order, topic) => {
+exports.fetchAllArticles = async (sort_by, order, topic, limit, p) => {
   let query = {
     text: `
-            SELECT a.author, a.title, a.article_id, a.topic, a.created_at, a.votes, a.article_img_url, CAST(COUNT(c.article_id) AS INT) AS comment_count 
+            SELECT a.author, a.title, a.article_id, a.topic, a.created_at, a.votes, a.article_img_url, CAST(COUNT(c.article_id) AS INT) AS comment_count, COUNT(a.article_id) AS total_count, count(*) OVER () AS total_count
             FROM articles a
             FULL JOIN comments c on c.article_id = a.article_id 
             GROUP BY a.article_id
-            ORDER BY a.created_at DESC;
+            ORDER BY a.created_at DESC
+            LIMIT 10 OFFSET 0;
             `,
   };
 
@@ -46,8 +48,6 @@ exports.fetchAllArticles = async (sort_by, order, topic) => {
     }
   }
   if (topic) {
-
-    
     const topics = await checkTopics("topics", "slug", topic);
     if (topics) {
       if (sort_by === undefined || order === undefined) {
@@ -61,6 +61,43 @@ exports.fetchAllArticles = async (sort_by, order, topic) => {
     }
   }
 
+  if (limit) {
+    order === undefined ? (order = "desc") : order;
+    sort_by === undefined ? (sort_by = "created_at") : sort_by;
+    p === undefined ? (p = 1) : p;
+
+    query = formatLimit(topic, sort_by, order, limit, p);
+
+    if (topic) {
+      const topics = await checkTopics("topics", "slug", topic);
+      if (topics) {
+        order === undefined ? (order = "desc") : order;
+        sort_by === undefined ? (sort_by = "created_at") : sort_by;
+        p === undefined ? (p = 1) : p;
+
+        query = formatLimit(topic, sort_by, order, limit, p);
+      }
+    }
+  }
+
+  if (p) {
+    order === undefined ? (order = "desc") : order;
+    sort_by === undefined ? (sort_by = "created_at") : sort_by;
+    limit === undefined ? (limit = 10) : limit;
+
+    query = formatLimit(topic, sort_by, order, limit, p);
+
+    if (topic) {
+      const topics = await checkTopics("topics", "slug", topic);
+      if (topics) {
+        order === undefined ? (order = "desc") : order;
+        sort_by === undefined ? (sort_by = "created_at") : sort_by;
+        limit === undefined ? (limit = 10) : limit;
+
+        query = formatLimit(topic, sort_by, order, limit, p);
+      }
+    }
+  }
   const result = await db.query(query);
 
   return result.rows;
@@ -130,7 +167,7 @@ exports.postComment = async (id, author, comment) => {
   });
   return result.rows[0];
 };
-exports.postArticle = async (author, title, body, topic ) => {
+exports.postArticle = async (author, title, body, topic) => {
   if (!title) {
     return Promise.reject({ status: 422, msg: "article title is required" });
   }

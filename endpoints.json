@@ -15,11 +15,13 @@
     }
   },
   "GET /api/articles": {
-    "description": "serves an array of all articles",
+    "description": "serves an array of all articles, can limit the articles served with a limit query",
     "queries": [
       "sort_by",
       "order",
-      "topic"
+      "topic",
+      "limit",
+      "page"
     ],
     "exampleResponse": {
       "articles": [

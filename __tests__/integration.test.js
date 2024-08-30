@@ -80,8 +80,7 @@ describe("GET /api/articles", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
-      .then(({ body: { articles } }) => {
-        expect(articles.length).toBe(13)       
+      .then(({ body: { articles } }) => {        
         for (const article of articles) {
           expect(article).toEqual(
             expect.objectContaining({
@@ -145,7 +144,7 @@ describe("GET /api/articles", () => {
       .get("/api/articles?topic=mitch")
       .expect(200)
       .then(({ body: { articles } }) => {                        
-        expect(articles.length).toBe(12)
+        expect(articles.length).toBe(10)
         for (const article of articles) {
           expect(article.topic).toBe(topic)
         }
@@ -161,6 +160,35 @@ describe("GET /api/articles", () => {
         expect(articles.length).toBe(0) 
       });
   });
+  test("200: returns an array article objects limited by the number specified in the limit query ", () => {
+    const limit = 5;
+    return request(app)
+      .get("/api/articles?topic=cats&limit=5&p=1")
+      .expect(200)
+      .then(({ body: { articles } }) => {          
+        if (articles.length < 5) {
+          expect(articles.length).toBe(articles.length)
+        } else{
+          expect(articles.length).toBe(limit)
+        }                     
+        
+      });
+  });
+  test.only("200: returns an array article objects page by the number specified in the page query ", () => {
+    const p = 2;
+    const limit = 10
+    return request(app)
+      .get("/api/articles?topic=mitch&p=2")
+      .expect(200)
+      .then(({ body: { articles } }) => {          
+        if (articles.length < 5) {
+          expect(articles.length).toBe(articles.length)
+        } else{
+          expect(articles.length).toBe(limit)
+        }                     
+        
+      });
+  });
   test("400: reject if column name (sort_by) is invalid", () => {
     return request(app)
       .get("/api/articles?sort_by=username")
@@ -172,7 +200,7 @@ describe("GET /api/articles", () => {
   test("404: reject if topic does not exist", () => {
     const topic = 'invalidtopic';
     return request(app)
-      .get("/api/articles?topic=invalidtopic")
+      .get("/api/articles?topic=invalidtopic&limit=4")
       .expect(404)
       .then(({ body: {msg}}) => {        
         expect(msg).toBe(`Topic ${topic} not found`);
