@@ -110,6 +110,23 @@
       ]
     }
   },
+  "POST /api/articles/": {
+    "description": "posts an article ",
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "article_id": 38,
+        "title": "my new article",
+        "topic": "cooking",
+        "author": "weegembump",
+        "body": "my new article body",
+        "created_at": "2024-08-30T12:53:52.766Z",
+        "votes": 0,
+        "article_img_url": "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700",
+        "comment_count": 0
+      }
+    }
+  },
   "POST /api/articles/:article_id/comments": {
     "description": "posts a comment for an article ",
     "queries": [],

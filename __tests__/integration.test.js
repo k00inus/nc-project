@@ -306,7 +306,7 @@ describe("GET /api/articles/:article_id/comments", () => {
   });
 });
 
-describe("POST /api/articles/:article_id/comments", () => {
+describe("POST /api/articles/", () => {
   test("201: adds a comment for an article", () => {
     const newComment = {
       username: "butter_bridge",
@@ -374,6 +374,115 @@ describe("POST /api/articles/:article_id/comments", () => {
       });
   });
 });
+describe("POST /api/articles", () => {
+  test("201: adds a new article", () => {
+    const newArticle= {
+      author: "butter_bridge",
+      title: "my new article",
+      body: "my new article body",
+      topic: "paper"
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body: { article} }) => {
+        expect(article.topic).toBe(newArticle.topic);
+        expect(article.title).toBe(newArticle.title);
+        expect(Object.keys(article).length).toBe(9);
+        expect(article.body).toBe(newArticle.body);
+        expect(article.author).toBe(newArticle.author);
+        expect(article.comment_count).toBe(0);
+      });
+  });
+  test("404: reject if username is wrong/invalid", () => {
+    const newArticle= {
+      author: "butter_bridg",
+      title: "my new article",
+      body: "my new article body",
+      topic: "random"
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("username butter_bridg not found");
+      });
+  });
+  test("404: reject if topic is wrong/invalid", () => {
+    const newArticle= {
+      author: "butter_bridge",
+      title: "my new article",
+      body: "my new article body",
+      topic: "random"
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("slug random not found");
+      });
+  });
+  test("422: topic not supplied", () => {
+    const newArticle= {
+      author: "butter_bridge",
+      title: "my new article",
+      body: "my new article body",
+    }
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(422)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("article topic is required");
+      });
+  });
+  test("422: author not supplied", () => {
+    const newArticle= {
+      title: "my new article",
+      body: "my new article body",
+      topic:  "paper"
+    }
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(422)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("username is required");
+      });
+  });
+  test("422: reject if the title is omitted", () => {
+    const newArticle= {
+      author: "butter_bridge",
+      body: "my new article body",
+      topic:  "paper"
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(422)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("article title is required");
+      });
+  });
+  test("422: reject if the body is omitted", () => {
+    const newArticle= {
+      author: "butter_bridge",
+      title: "my new article",
+      topic:  "paper"
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(422)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("article body is required");
+      });
+  });
+
+});
 
 describe("PATCH /api/articles/:article_id", () => {
   test("200: updates the article with the given id by increasing or decreasing the votes tally", () => {
@@ -418,7 +527,7 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 });
-describe.only("PATCH /api/comments/:comment_id", () => {
+describe("PATCH /api/comments/:comment_id", () => {
   test("200: updates the votes property on a comment object with the given id by increasing or decreasing the votes tally", () => {
     const newVotes = { inc_votes: -100 };
     return request(app)

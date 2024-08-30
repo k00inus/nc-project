@@ -130,7 +130,32 @@ exports.postComment = async (id, author, comment) => {
   });
   return result.rows[0];
 };
-
+exports.postArticle = async (author, title, body, topic ) => {
+  if (!title) {
+    return Promise.reject({ status: 422, msg: "article title is required" });
+  }
+  if (!body) {
+    return Promise.reject({ status: 422, msg: "article body is required" });
+  }
+  if (!author) {
+    return Promise.reject({ status: 422, msg: "username is required" });
+  } else {
+    await checkExists("users", "username", author);
+  }
+  if (!topic) {
+    return Promise.reject({ status: 422, msg: "article topic is required" });
+  } else {
+    await checkExists("topics", "slug", topic);
+  }
+  const result = await db.query({
+    text: `
+          INSERT INTO articles (author, title, body, topic) 
+          VALUES ($1, $2, $3, $4)
+          RETURNING *, 0 AS comment_count`,
+    values: [author, title, body, topic],
+  });
+  return result.rows[0];
+};
 exports.editArticle = async (id, votes) => {
   if (!votes) {
     return Promise.reject({ status: 400, msg: "Input required" });

@@ -1,4 +1,4 @@
-const { selectArticleById, fetchAllArticles, fetchCommentsByArticleId, postComment, editArticle, } = require("../models/articles.models");
+const { selectArticleById, fetchAllArticles, fetchCommentsByArticleId, postComment, editArticle, postArticle, } = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
   const { sort_by, order, topic } = req.query;    
@@ -44,6 +44,16 @@ exports.postCommentByArticleId = (req, res, next) => {
   postComment(article_id, username, body)
     .then((comment) => {
       return res.status(201).send({ comment });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+exports.postArticle = (req, res, next) => {
+  const { author, title, body, topic } = req.body;
+  postArticle(author, title, body, topic )
+    .then((article) => {
+      return res.status(201).send({ article });
     })
     .catch((err) => {
       next(err);
