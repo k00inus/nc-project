@@ -376,7 +376,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .expect(400)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("invalid request");
-      })
+      });
   });
 });
 describe("POST /api/articles/:article_id/comments", () => {
@@ -586,7 +586,7 @@ describe("POST /api/topics", () => {
   });
   test("422: description not supplied", () => {
     const newTopic = {
-       slug: "My new topic"
+      slug: "My new topic",
     };
     return request(app)
       .post("/api/topics")
@@ -598,8 +598,8 @@ describe("POST /api/topics", () => {
   });
   test("422:reject if topic already exists", () => {
     const newTopic = {
-       slug: "paper",
-       description: "about my new topic",
+      slug: "paper",
+      description: "about my new topic",
     };
     return request(app)
       .post("/api/topics")
@@ -708,9 +708,31 @@ describe("DELETE /api/comments/:comment_id", () => {
         expect(msg).toBe("comment_id 643 not found");
       });
   });
-  test("400: reject if article_id is invalid", () => {
+  test("400: reject if comment_id is invalid", () => {
     return request(app)
       .delete("/api/comments/banana")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("invalid request");
+      });
+  });
+});
+
+describe("DELETE /api/articles/:article_id", () => {
+  test("204: delete an article based on the given id, and its respective comments", () => {
+    return request(app).delete("/api/articles/1").expect(204);
+  });
+  test("404: reject if article_id is wrong/invalid", () => {
+    return request(app)
+      .delete("/api/articles/643")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("article_id 643 not found");
+      });
+  });
+  test("400: reject if article_id is invalid", () => {
+    return request(app)
+      .delete("/api/articles/banana")
       .expect(400)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("invalid request");

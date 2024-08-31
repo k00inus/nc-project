@@ -15,7 +15,7 @@ exports.deleteComment = async (id) => {
         RETURNING *;`,
     values: [id],
   });
-  return result.rows[0];
+  return ;
 };
 
 exports.editComment = async (id, votes) => {
