@@ -5,6 +5,7 @@ const {
   postCommentByArticleId,
   patchArticleById,
   postArticle,
+  deleteArticleById,
 } = require("../controllers/articles.controllers");
 
 const router = require("express").Router();
@@ -21,4 +22,6 @@ router.post("/:article_id/comments", postCommentByArticleId);
 
 router.patch("/:article_id", patchArticleById);
 
-module.exports = router
+router.delete("/:article_id", deleteArticleById);
+
+module.exports = router;

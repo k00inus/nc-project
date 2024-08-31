@@ -105,7 +105,7 @@ const formatLimit = (topic, sort_by, order, limit, p) => {
   );
 
   topic === undefined ? (query = query1) : (query = query2);
-  
+
   return query;
 };
 
@@ -134,5 +134,5 @@ module.exports = {
   formatTopics,
   checkTopics,
   formatLimit,
-  postCheckExists
+  postCheckExists,
 };

@@ -1,13 +1,21 @@
-const { selectArticleById, fetchAllArticles, fetchCommentsByArticleId, postComment, editArticle, postArticle, } = require("../models/articles.models");
+const {
+  selectArticleById,
+  fetchAllArticles,
+  fetchCommentsByArticleId,
+  postComment,
+  editArticle,
+  postArticle,
+  deleteArticle,
+} = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
-  const { sort_by, order, topic, limit, p } = req.query; 
-       
+  const { sort_by, order, topic, limit, p } = req.query;
+
   fetchAllArticles(sort_by, order, topic, limit, p)
-    .then((articles) => {      
+    .then((articles) => {
       res.status(200).send({ articles });
     })
-    .catch((err) => {            
+    .catch((err) => {
       next(err);
     });
 };
@@ -25,15 +33,13 @@ exports.getArticleById = (req, res, next) => {
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  const { limit, p } = req.query; 
-  
+  const { limit, p } = req.query;
+
   fetchCommentsByArticleId(article_id, limit, p)
     .then((comments) => {
       res.status(200).send({ comments });
     })
     .catch((err) => {
-      ;
-      
       if (err.code === "22P02") {
         res.status(400).send({ status: 400, msg: "invalid request" });
       }
@@ -54,8 +60,8 @@ exports.postCommentByArticleId = (req, res, next) => {
 };
 exports.postArticle = (req, res, next) => {
   const { author, title, body, topic } = req.body;
-  
-  postArticle(author, title, body, topic )
+
+  postArticle(author, title, body, topic)
     .then((article) => {
       return res.status(201).send({ article });
     })
@@ -66,14 +72,24 @@ exports.postArticle = (req, res, next) => {
 
 exports.patchArticleById = (req, res, next) => {
   const { article_id } = req.params;
-  const { inc_votes } = req.body;  
+  const { inc_votes } = req.body;
 
   editArticle(article_id, inc_votes)
     .then((article) => {
       return res.status(200).send({ article });
     })
-    .catch((err) => {  
-         
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.deleteArticleById = (req, res, next) => {
+  const { article_id } = req.params;
+  deleteArticle(article_id)
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch((err) => {
       next(err);
     });
 };

@@ -129,22 +129,25 @@ exports.fetchCommentsByArticleId = async (id, limit, p) => {
   } else {
     await checkExists("articles", "article_id", id);
   }
-  if (limit ) {
-    if (typeof Number(limit) !== 'number') {
-      return Promise.reject({ status: 400, msg: "limit  input must be number" });
-    } else  if (p === undefined ) {
+  if (limit) {
+    if (typeof Number(limit) !== "number") {
+      return Promise.reject({
+        status: 400,
+        msg: "limit  input must be number",
+      });
+    } else if (p === undefined) {
       p = 1;
     }
   }
 
-  if (p ) {
-    if (typeof Number(p) !== 'number') {
+  if (p) {
+    if (typeof Number(p) !== "number") {
       return Promise.reject({ status: 400, msg: "page input must be number" });
-    } else  if (limit === undefined ) {
+    } else if (limit === undefined) {
       limit = 10;
     }
   }
-   
+
   const result = await db.query({
     text: `
         SELECT *, CAST(COUNT(*) OVER () as INT) AS total_count FROM comments
@@ -228,4 +231,27 @@ exports.editArticle = async (id, votes) => {
     values: [votes, id],
   });
   return result.rows[0];
+};
+exports.deleteArticle = async (id) => {
+  if (!id) {
+    return Promise.reject({ status: 400, msg: "Id required" });
+  } else {
+    await checkExists("articles", "article_id", id);
+  }
+  await db.query({
+    text: `
+        DELETE FROM comments
+        WHERE article_id  = $1
+        RETURNING *;`,
+    values: [id],
+  });
+  await db.query({
+    text: `
+        DELETE FROM articles
+        WHERE article_id  = $1
+        RETURNING *;`,
+    values: [id],
+  });
+
+  return;
 };
