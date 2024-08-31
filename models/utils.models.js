@@ -17,6 +17,22 @@ const checkExists = async (table_name, column_name, id) => {
     });
   }
 };
+const postCheckExists = async (table_name, column_name, input) => {
+  const query = format(
+    "SELECT EXISTS (SELECT * FROM %I WHERE %I  = %L)",
+    table_name,
+    column_name,
+    input
+  );
+
+  const checkIfInputIsValid = await db.query(query);
+  if (checkIfInputIsValid.rows[0].exists) {
+    return Promise.reject({
+      status: 422,
+      msg: `Topic ${input} already exists`,
+    });
+  }
+};
 
 const formatQuery = (sort_by, order) => {
   let query = format(
@@ -118,4 +134,5 @@ module.exports = {
   formatTopics,
   checkTopics,
   formatLimit,
+  postCheckExists
 };

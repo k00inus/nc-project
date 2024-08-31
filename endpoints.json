@@ -154,6 +154,16 @@
       }
     }
   },
+  "POST /api/topics/": {
+    "description": "posts a new topic ",
+    "queries": [],
+    "exampleResponse": {
+      "topic": {
+        "slug": "paper",
+        "description": "about my new topic"
+      }
+    }
+  },
   "PATCH /api/articles/:article_id": {
     "description": "Updates the article with the given id by increasing or decreasing the votes tally ",
     "exampleInput": {

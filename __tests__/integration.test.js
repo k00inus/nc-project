@@ -338,7 +338,7 @@ describe("GET /api/articles/:article_id/comments", () => {
         }
       });
   });
-  test.only("200: returns an array comment objects by the given page number specified in the query ", () => {
+  test("200: returns an array comment objects by the given page number specified in the query ", () => {
     const limit = 10;
     const p = 3;
     return request(app)
@@ -379,7 +379,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       })
   });
 });
-describe("POST /api/articles/", () => {
+describe("POST /api/articles/:article_id/comments", () => {
   test("201: adds a comment for an article", () => {
     const newComment = {
       username: "butter_bridge",
@@ -555,7 +555,61 @@ describe("POST /api/articles", () => {
       });
   });
 });
+describe("POST /api/topics", () => {
+  test("201: adds a new topic", () => {
+    const newTopic = {
+      slug: "My new topic",
+      description: "about my new topic",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201)
+      .then(({ body: { topic } }) => {
+        expect(topic.slug).toBe(newTopic.slug);
+        expect(topic.description).toBe(newTopic.description);
+        expect(Object.keys(topic).length).toBe(2);
+      });
+  });
 
+  test("422: topic not supplied", () => {
+    const newTopic = {
+      description: "about my new topic",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(422)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Topic slug is required");
+      });
+  });
+  test("422: description not supplied", () => {
+    const newTopic = {
+       slug: "My new topic"
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(422)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Topic description is required");
+      });
+  });
+  test("422:reject if topic already exists", () => {
+    const newTopic = {
+       slug: "paper",
+       description: "about my new topic",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(422)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(`Topic ${newTopic.slug} already exists`);
+      });
+  });
+});
 describe("PATCH /api/articles/:article_id", () => {
   test("200: updates the article with the given id by increasing or decreasing the votes tally", () => {
     const newVotes = { inc_votes: -100 };
