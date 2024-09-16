@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 
 const {
   serverErrorsHandler,
@@ -7,6 +8,7 @@ const {
 } = require("./errors");
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 app.use("/api", require("../routes/topics.routes"));
@@ -24,7 +26,7 @@ app.use(customErrorHandler);
 app.use(serverErrorsHandler);
 
 app.all("*", (req, res) => {
-  res. status (404) .send({msg: "That page does not exist, check your url"})
-})
+  res.status(404).send({ msg: "That page does not exist, check your url" });
+});
 
 module.exports = app;
